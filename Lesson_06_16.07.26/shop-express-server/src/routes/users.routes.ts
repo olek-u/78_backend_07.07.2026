@@ -2,7 +2,8 @@
 import { Router } from "express";
 import {v7} from "uuid";
 
-import { Post } from "../posts.types";
+//import { User } from "../modules/users.types";
+import { User } from "../modules/users.types";
 
 
 // С помощью router в дальнейшем сможем прописать логику запросов
@@ -12,11 +13,14 @@ const router = Router();
 // Пока данные будем хранить локально без БД.
 // Мы сможем использовать любые методы и они будут работать 
 // но при перезегрузке сервера они будут потеряны
-const posts: Post[] = [
-    { id: v7(), title: "Cloudy weather", text: "It is dark again" },
-
-    //{ id: v7(), title: "Job", text: "I got new job!" },
+//const posts: Post[] = [
+const users: User[] = [
     
+  {id: v7(), name: "Aleks", email: "korwet@gmail.de", 
+    password: "qwerty1234", role: "admin", createdAt: new Date() },
+  {id: v7(), name: "Nico", email: "Nicolas@gmail.de",
+    password: "ytrewq4321", role: "user", createdAt: new Date() },
+  
 ];
 
 
@@ -24,7 +28,7 @@ const posts: Post[] = [
 // Так как в index.ts мы используем url /posts, то в данном
 // файле мы можем не указывать каждый раз /posts, а указывать просто /
 router.get("/", (_req, res)=>{
-    res.status(200).json(posts)
+    res.status(200).json(users)
 })
 
 // GET /posts/:id (получение одного поста)
@@ -33,50 +37,55 @@ router.get("/:id", (req, res) => {
   // params - объект с параметрами запроса
   // {id} - диструктурирующее присваивание
   const { id } = req.params;
-  const post = posts.find((post) => post.id === id);
-  if (!post) {
+  //const post = posts.find((post) => post.id === id);
+  const user = users.find((user) => user.id === id);
+  
+  if (!user) {
     res.status(404).json({ error: `Post with id ${id} not found` });
   }
-  res.status(200).json(post);
+  res.status(200).json(user);
 });
 
-// POST /posts (создание обьекта и добавление в массив)
-// {title: "", text: ""}
+// USER /users (создание обьекта и добавление в массив)
+// {name: "", email: "", password: "", role: ""}
 router.post("/", (req, res) => {
-  const { title, text } = req.body;
-  if (!title || !text) {
+
+  const { name, email, password, role } = req.body;
+  if (!name || !email || !password || !role ) {
     res.status(400).json({ error: "Bad request" });
   }
-  const post = { id: v7(), title, text };
-  posts.push(post);
-  res.status(201).json(post);
+  const post = { id: v7(),   name, email, password, role};
+  //posts.push(post);
+  users.push(user);
+  res.status(201).json(user);
 });
 
-// params = {
-//    id: string;
-//}
-// const id = req.params.id
-// const { id } = req.params;
 
 // PATCH /posts/:id
 router.patch("/:id", (req, res) => {
   const { id } = req.params;
-  const { title, text } = req.body;
-  const post = posts.find((post) => post.id === id);
-  if (!post) {
+  const { name, email, password, role } = req.body;
+  const user = users.find((user) => user.id === id);
+  if (!user) {
     res.status(404).json({ error: `Post with id ${id} not found` });
     throw new Error("Not found");
   }
-  if (!title && !text) {
+  if (!name && !email && !password && !role) {
     res.status(400).json({ error: "Bad request. No title and text" });
   }
-  if (title) {
-    post.title = title;
+  if (name) {
+    user.name = name;
   }
-  if (text) {
-    post.text = text;
+  if (email) {
+    user.email = email;
   }
-  res.status(200).json(post)
+  if (password) {
+    user.password = password;
+  }
+  if (role) {
+    user.role = role;  
+  }
+  res.status(200).json(user)
 });
 
 
@@ -84,14 +93,14 @@ router.patch("/:id", (req, res) => {
 // DELETE /posts/:id
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
-  const post = posts.find((post) => post.id === id);
-  if (!post) {
+  const user = users.find((user) => user.id === id);
+  if (!user) {
     res.status(404).json({ error: `Post with id ${id} not found` });
     throw new Error("Not found");
   }
-  const indexOfPost = posts.findIndex((post)=> post.id === id);
-  posts.splice(indexOfPost, 1);
-  res.status(200).json(post);
+  const indexOfPost = users.findIndex((user)=> user.id === id);
+  users.splice(indexOfPost, 1);
+  res.status(200).json(user);
 });
 export default router;
 // params = {
